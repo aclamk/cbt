@@ -95,6 +95,7 @@ class Ceph(Cluster):
         self.monmap_fn = "%s/monmap" % self.tmp_dir
         self.use_existing = config.get('use_existing', True)
         self.newstore_block = config.get('newstore_block', False)
+        self.create_device_links = config.get('create_device_links', False)
         self.version_compat = config.get('version_compat', '')
         # these parameters control parallel OSD build 
         self.ceph_osd_online_rate = config.get('osd_online_rate', 10)
@@ -243,8 +244,11 @@ class Ceph(Cluster):
                 mkfs_cmd += '; mount %s -t %s /dev/disk/by-partlabel/osd-device-%s-data %s/osd-device-%s-data' % (mount_opts, fs, device, self.mnt_dir, device)
                 
                 # make a symlink for block if using newstore+block
-                if self.newstore_block:
+                if self.newstore_block or self.create_device_links:
                     mkfs_cmd += ' ; sudo ln -s /dev/disk/by-partlabel/osd-device-%s-block %s/osd-device-%s-data/block' % (device, self.mnt_dir, device)
+                if self.create_device_links:
+                    mkfs_cmd += ' ; sudo ln -s /dev/disk/by-partlabel/osd-device-%s-wal %s/osd-device-%s-data/wal' % (device, self.mnt_dir, device)
+                    mkfs_cmd += ' ; sudo ln -s /dev/disk/by-partlabel/osd-device-%s-db %s/osd-device-%s-data/db' % (device, self.mnt_dir, device)
                 mkfs_cmd += '"'
 
                 mkfs_threads.append((device, common.pdsh(osds, mkfs_cmd)))

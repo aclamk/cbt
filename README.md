@@ -168,6 +168,7 @@ cluster:
   conf_file: '/home/nhm/src/ceph-tools/cbt/newstore/ceph.conf.1osd'
   iterations: 1
   use_existing: False
+  create_device_links: True #necessary in ceph versions that do not create them by default
   clusterid: "ceph"
   tmp_dir: "/tmp/cbt"
   pool_profiles:
